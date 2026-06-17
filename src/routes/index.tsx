@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -52,16 +51,15 @@ function Landing() {
 
   async function handleGoogle() {
     setLoadingGoogle(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/app` },
     });
-    if (result.error) {
+    if (error) {
       toast.error("Google sign-in failed. Please try again.");
       setLoadingGoogle(false);
-      return;
     }
-    if (result.redirected) return; // browser will navigate
-    navigate({ to: "/app" });
+    // On success the browser is redirected to Google.
   }
 
   async function handleEmailSignup(e: React.FormEvent) {
